@@ -10,7 +10,7 @@ local allowed_delete_type = {
 
 local function get_opts(opts)
   local result = {}
-  result.delete_type = opts.delete_type
+  result.delete_type = opts.type
   result.delete_cmd = opts.delete_cmd
   result.force = opts.force
 
@@ -53,12 +53,18 @@ end
 function M.wipe(args)
   args.delete_cmd = 'bwipeout'
   local opts = get_opts(args)
+  if opts == nil then
+    return
+  end
   close_buffers(opts)
 end
 
 function M.delete(args)
   args.delete_cmd = 'bdelete'
   local opts = get_opts(args)
+  if opts == nil then
+    return
+  end
   close_buffers(opts)
 end
 
