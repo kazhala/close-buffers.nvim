@@ -1,4 +1,4 @@
-# close-buffers.lua
+# close-buffers.nvim
 
 Lua port of [close-buffers.vim](https://github.com/Asheq/close-buffers.vim). This plugin allows you
 to quickly delete multiple buffers based on condition provided.
@@ -14,13 +14,13 @@ Neovim >= 0.5
 ### [packer.nvim](https://github.com/wbthomason/packer.nvim)
 
 ```
-use 'kazhala/close-buffers.lua'
+use 'kazhala/close-buffers.nvim'
 ```
 
 ### [vim-plug](https://github.com/junegunn/vim-plug)
 
 ```
-plug 'kazhala/close-buffers.lua'
+plug 'kazhala/close-buffers.nvim'
 ```
 
 ## Usage
