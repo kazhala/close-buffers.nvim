@@ -1,14 +1,6 @@
 local M = {}
 local buffers = require('close_buffers.buffers')
 
-local allowed_delete_type = {
-  nameless = true,
-  other = true,
-  hidden = true,
-  all = true,
-  this = true,
-}
-
 --- Argument parser function
 -- @param opts table: Table of options to parse.
 -- @return table: Table of parsed options.
@@ -18,9 +10,6 @@ local function get_opts(opts)
   result.delete_cmd = opts.delete_cmd
   result.force = opts.force
 
-  if allowed_delete_type[result.delete_type] == nil then
-    return
-  end
   if result.force == true then
     result.delete_cmd = result.delete_cmd .. '!'
   end
@@ -51,24 +40,24 @@ function M.delete(args)
 end
 
 --- VIM command entry function
--- @param type string: Type of buffer to delete.
+-- @param delete_type string: Type of buffer to delete.
 -- @param command string: lua function to invoke, either 'delete' or 'wipe'.
 -- @param force string: Append bang to deletion command.
-function M.cmd(type, command, force)
+function M.cmd(delete_type, command, force)
   vim.validate({
-    type = { type, 'string' },
+    type = { delete_type, 'string' },
     command = { command, 'string' },
     force = { force, 'string', true },
   })
 
-  if allowed_delete_type[type] == nil then
-    return
-  end
-
   local opts = {}
   opts.force = force == '!' and true or false
-  opts.type = type
+  opts.type = delete_type
   M[command](opts)
+end
+
+function M.setup(user_conf)
+  require('close_buffers.config').set(user_conf)
 end
 
 return M

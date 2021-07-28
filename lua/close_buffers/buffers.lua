@@ -1,5 +1,14 @@
 local M = {}
 local api = vim.api
+local config = require('close_buffers.config')
+
+local allowed_delete_type = {
+  nameless = true,
+  other = true,
+  hidden = true,
+  all = true,
+  this = true,
+}
 
 --- Main function to delete all buffers
 -- @param delete_type string: Types of buffer to delete.
@@ -12,6 +21,10 @@ function M.close(delete_type, delete_cmd, force)
     force = { force, 'boolean' },
   })
 
+  if allowed_delete_type[delete_type] == nil then
+    return
+  end
+
   local buffers = vim.tbl_filter(function(buf)
     return api.nvim_buf_is_valid(buf) and api.nvim_buf_get_option(buf, 'buflisted')
   end, api.nvim_list_bufs())
@@ -20,12 +33,20 @@ function M.close(delete_type, delete_cmd, force)
   --- Delete provided buffer
   -- @param buf int: Buffer number to delete.
   local function delete_buffer(buf)
+    if config.get('filetype_ignore')[api.nvim_buf_get_option(buf, 'filetype')] then
+      return
+    end
     vim.cmd(delete_cmd .. ' ' .. buf)
   end
 
-  --- Focus previous buffer
+  --- Focus previous buffer and preserve window layout
   -- @param buf int: Buffer number to switch focus.
-  local function focus_prev_buffer(buf)
+  -- @param del_type string: Types of deletion to perform.
+  local function preserve_window_layout(buf, del_type)
+    if not config.get('preserve_window_layout')[del_type] then
+      return
+    end
+
     if #buffers < 2 then
       return
     end
@@ -38,19 +59,24 @@ function M.close(delete_type, delete_cmd, force)
       return
     end
 
-    local prev_buffer_index = nil
-    for index, buffer in ipairs(buffers) do
-      if buffer == buf then
-        prev_buffer_index = index - 1 > 0 and index - 1 or #buffers
-        for _, win in ipairs(windows) do
-          api.nvim_win_set_buf(win, buffers[prev_buffer_index])
+    local prev_buffer_command = config.get('prev_buffer_command')
+    if prev_buffer_command and type(prev_buffer_command) == 'function' then
+      prev_buffer_command()
+    else
+      local prev_buffer_index = nil
+      for index, buffer in ipairs(buffers) do
+        if buffer == buf then
+          prev_buffer_index = index - 1 > 0 and index - 1 or #buffers
+          for _, win in ipairs(windows) do
+            api.nvim_win_set_buf(win, buffers[prev_buffer_index])
+          end
         end
       end
     end
   end
 
   if delete_type == 'this' then
-    focus_prev_buffer(bufnr)
+    preserve_window_layout(bufnr, delete_type)
     delete_buffer(bufnr)
     return
   end
@@ -68,13 +94,16 @@ function M.close(delete_type, delete_cmd, force)
         string.format('No write since last change for buffer %d (set force to true to override)', buffer)
       )
     elseif delete_type == 'nameless' and api.nvim_buf_get_name(buffer) == '' then
-      focus_prev_buffer(buffer)
+      preserve_window_layout(buffer, delete_type)
       delete_buffer(buffer)
     elseif delete_type == 'other' and bufnr ~= buffer then
+      preserve_window_layout(buffer, delete_type)
       delete_buffer(buffer)
     elseif delete_type == 'hidden' and non_hidden_buffer[buffer] == nil then
+      preserve_window_layout(buffer, delete_type)
       delete_buffer(buffer)
     elseif delete_type == 'all' then
+      preserve_window_layout(buffer, delete_type)
       delete_buffer(buffer)
     end
   end
