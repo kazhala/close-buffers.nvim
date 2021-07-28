@@ -1,4 +1,5 @@
 local M = {}
+local api = vim.api
 
 local allowed_delete_type = {
   nameless = true,
@@ -27,8 +28,10 @@ end
 
 -- main function to delete all buffers
 local function close_buffers(opts)
-  local buffers = vim.fn.getbufinfo({ buflisted = true })
-  local bufnr = vim.fn.bufnr('%')
+  local buffers = vim.tbl_filter(function(buf)
+    return api.nvim_buf_is_valid(buf) and api.nvim_buf_get_option(buf, 'buflisted')
+  end, api.nvim_list_bufs())
+  local bufnr = api.nvim_get_current_buf()
 
   -- delete provided buffer
   local function delete_buffer(buf)
@@ -43,8 +46,8 @@ local function close_buffers(opts)
     end
 
     local windows = vim.tbl_filter(function(win)
-      return vim.api.nvim_win_get_buf(win) == buf
-    end, vim.api.nvim_list_wins())
+      return api.nvim_win_get_buf(win) == buf
+    end, api.nvim_list_wins())
 
     if #windows == 0 then
       return
@@ -52,10 +55,10 @@ local function close_buffers(opts)
 
     local prev_buffer_index = nil
     for index, buffer in ipairs(buffers) do
-      if buffer.bufnr == buf then
+      if buffer == buf then
         prev_buffer_index = index - 1 > 0 and index - 1 or #buffers
         for _, win in ipairs(windows) do
-          vim.api.nvim_win_set_buf(win, buffers[prev_buffer_index].bufnr)
+          api.nvim_win_set_buf(win, buffers[prev_buffer_index])
         end
       end
     end
@@ -67,20 +70,27 @@ local function close_buffers(opts)
     return
   end
 
-  for _, buffer in pairs(buffers) do
-    if buffer.changed ~= 0 and not opts.force then
-      vim.api.nvim_err_writeln(
-        string.format('No write since last change for buffer %d (set force to true to override)', buffer.bufnr)
+  local non_hidden_buffer = {}
+  if opts.delete_type == 'hidden' then
+    for _, win in ipairs(api.nvim_list_wins()) do
+      non_hidden_buffer[api.nvim_win_get_buf(win)] = true
+    end
+  end
+
+  for _, buffer in ipairs(buffers) do
+    if api.nvim_buf_get_option(buffer, 'modified') and not opts.force then
+      api.nvim_err_writeln(
+        string.format('No write since last change for buffer %d (set force to true to override)', buffer)
       )
-    elseif opts.delete_type == 'nameless' and buffer.name == '' then
-      focus_prev_buffer(buffer.bufnr)
-      delete_buffer(buffer.bufnr)
-    elseif opts.delete_type == 'other' and bufnr ~= buffer.bufnr then
-      delete_buffer(buffer.bufnr)
-    elseif opts.delete_type == 'hidden' and buffer.hidden ~= 0 then
-      delete_buffer(buffer.bufnr)
+    elseif opts.delete_type == 'nameless' and api.nvim_buf_get_name(buffer) == '' then
+      focus_prev_buffer(buffer)
+      delete_buffer(buffer)
+    elseif opts.delete_type == 'other' and bufnr ~= buffer then
+      delete_buffer(buffer)
+    elseif opts.delete_type == 'hidden' and non_hidden_buffer[buffer] == nil then
+      delete_buffer(buffer)
     elseif opts.delete_type == 'all' then
-      delete_buffer(buffer.bufnr)
+      delete_buffer(buffer)
     end
   end
 end
