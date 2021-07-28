@@ -4,7 +4,7 @@ let s:save_cpo = &cpo
 set cpo&vim
 
 command! -bang -nargs=1 BDelete lua require('close_buffers').cmd(<q-args>, 'delete', <q-bang>)
-command! -bang -nargs=1 BWipe lua require('close_buffers').cmd(<q-args>, 'wipe', <q-bang>)
+command! -bang -nargs=1 BWipeout lua require('close_buffers').cmd(<q-args>, 'wipe', <q-bang>)
 
 let &cpo = s:save_cpo
 unlet s:save_cpo

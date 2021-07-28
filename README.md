@@ -25,6 +25,8 @@ plug 'kazhala/close-buffers.nvim'
 
 ## Usage
 
+### Lua
+
 ```lua
 -- bdelete
 require('close_buffers').delete({type = 'hidden', force = true})
@@ -33,6 +35,17 @@ require('close_buffers').delete({type = 'nameless'})
 -- bwipeout
 require('close_buffers').wipe({type = 'all'})
 require('close_buffers').wipe({type = 'other'})
+```
+
+### Vim
+
+The plugin exposes 2 vim commands, `BDelete` and `BWipeout`. Each takes a single argument listed under the [options](#type) section.
+To force a deletion, simply append the command with a bang.
+
+```
+:BDelete hidden
+:BDelete! nameless
+:BWipeout! all
 ```
 
 ## Options
