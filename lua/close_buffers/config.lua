@@ -3,7 +3,7 @@ local M = {}
 local config = {
   filetype_ignore = {},
   preserve_window_layout = { 'this', 'hidden' },
-  prev_buffer_command = nil,
+  next_buffer_cmd = nil,
 }
 
 local _config = {}

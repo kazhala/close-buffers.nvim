@@ -39,7 +39,7 @@ function M.close(delete_type, delete_cmd, force)
     vim.cmd(delete_cmd .. ' ' .. buf)
   end
 
-  --- Focus previous buffer and preserve window layout
+  --- Focus next buffer and preserve window layout
   -- @param buf int: Buffer number to switch focus.
   -- @param del_type string: Types of deletion to perform.
   local function preserve_window_layout(buf, del_type)
@@ -59,16 +59,15 @@ function M.close(delete_type, delete_cmd, force)
       return
     end
 
-    local prev_buffer_command = config.get('prev_buffer_command')
-    if prev_buffer_command and type(prev_buffer_command) == 'function' then
-      prev_buffer_command()
+    local next_buffer_cmd = config.get('next_buffer_cmd')
+    if next_buffer_cmd and type(next_buffer_cmd) == 'function' then
+      next_buffer_cmd()
     else
-      local prev_buffer_index = nil
       for index, buffer in ipairs(buffers) do
         if buffer == buf then
-          prev_buffer_index = index - 1 > 0 and index - 1 or #buffers
+          local new_focus_index = index + 1 > #buffers and #buffers or index + 1
           for _, win in ipairs(windows) do
-            api.nvim_win_set_buf(win, buffers[prev_buffer_index])
+            api.nvim_win_set_buf(win, buffers[new_focus_index])
           end
         end
       end
