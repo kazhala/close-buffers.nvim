@@ -18,7 +18,7 @@ function M.close(delete_type, delete_cmd, force)
   vim.validate({
     type = { delete_type, 'string' },
     command = { delete_cmd, 'string' },
-    force = { force, 'boolean' },
+    force = { force, 'boolean', true },
   })
 
   if allowed_delete_type[delete_type] == nil then
