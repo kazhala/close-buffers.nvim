@@ -8,6 +8,7 @@ local allowed_delete_type = {
   this = true,
 }
 
+-- argument parser
 local function get_opts(opts)
   local result = {}
   result.delete_type = opts.type
@@ -24,6 +25,7 @@ local function get_opts(opts)
   return result
 end
 
+-- main function to delete all buffers
 local function close_buffers(opts)
   local buffers = vim.fn.getbufinfo({ buflisted = true })
   local bufnr = vim.fn.bufnr('%')
@@ -50,6 +52,7 @@ local function close_buffers(opts)
   end
 end
 
+-- lua wipe entry function
 function M.wipe(args)
   args.delete_cmd = 'bwipeout'
   local opts = get_opts(args)
@@ -59,6 +62,7 @@ function M.wipe(args)
   close_buffers(opts)
 end
 
+-- lua delete entry function
 function M.delete(args)
   args.delete_cmd = 'bdelete'
   local opts = get_opts(args)
@@ -66,6 +70,24 @@ function M.delete(args)
     return
   end
   close_buffers(opts)
+end
+
+-- vim script command entry function
+function M.cmd(type, command, force)
+  vim.validate({
+    type = { type, 'string' },
+    command = { command, 'string' },
+    force = { force, 'string', true },
+  })
+
+  if allowed_delete_type[type] == nil then
+    return
+  end
+
+  local opts = {}
+  opts.force = force == '!' and true or false
+  opts.type = type
+  M[command](opts)
 end
 
 return M
