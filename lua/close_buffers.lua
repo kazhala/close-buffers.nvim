@@ -40,11 +40,15 @@ local function close_buffers(opts)
   end
 
   for _, buffer in pairs(buffers) do
-    if opts.delete_type == 'nameless' and buffer.name == '' then
+    if buffer.changed ~= 0 and not opts.force then
+      vim.api.nvim_err_writeln(
+        string.format('No write since last change for buffer %d (set force to true to override)', buffer.bufnr)
+      )
+    elseif opts.delete_type == 'nameless' and buffer.name == '' then
       delete_buffer(buffer.bufnr)
     elseif opts.delete_type == 'other' and bufnr ~= buffer.bufnr then
       delete_buffer(buffer.bufnr)
-    elseif opts.delete_type == 'hidden' and #buffer.windows == 0 then
+    elseif opts.delete_type == 'hidden' and buffer.hidden ~= 0 then
       delete_buffer(buffer.bufnr)
     elseif opts.delete_type == 'all' then
       delete_buffer(buffer.bufnr)
