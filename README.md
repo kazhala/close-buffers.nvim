@@ -3,6 +3,8 @@
 Lua port of [close-buffers.vim](https://github.com/Asheq/close-buffers.vim) with a few [feature extensions](#configuration). This plugin allows you
 to quickly delete multiple buffers based on the [condition](#type) provided.
 
+![Video Demo](https://assets.kazhala.me/close-buffers/close-buffers.mov)
+
 ## Requirements
 
 ```
@@ -29,7 +31,7 @@ plug 'kazhala/close-buffers.nvim'
 require('close-buffers').setup({
   filetype_ignore = {},  -- Filetype to ignore when running deletions
   preserve_window_layout = { 'this', 'hidden' },  -- Types of deletion that should preserve the window layout
-  next_buffer_cmd = nil,  -- Custom function to retrieve the next buffer when preserving window layout
+  next_buffer_cmd = function(windows) end,  -- Custom function to retrieve the next buffer when preserving window layout
 })
 ```
 
@@ -44,8 +46,13 @@ by nvim-bufferline.lua to get the next buffer when preserving the window layout.
 ```lua
 require('close-buffers').setup({
   preserve_window_layout = { 'this' },
-  next_buffer_cmd = function()
+  next_buffer_cmd = function(windows)
     require('bufferline').cycle(1)
+    local bufnr = vim.api.nvim_get_current_buf()
+
+    for _, window in ipairs(windows) do
+      vim.api.nvim_win_set_buf(window, bufnr)
+    end
   end,
 })
 
