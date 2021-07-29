@@ -61,7 +61,7 @@ function M.close(delete_type, delete_cmd, force)
 
     local next_buffer_cmd = config.get('next_buffer_cmd')
     if next_buffer_cmd and type(next_buffer_cmd) == 'function' then
-      next_buffer_cmd()
+      next_buffer_cmd(windows)
     else
       for index, buffer in ipairs(buffers) do
         if buffer == buf then
