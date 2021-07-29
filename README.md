@@ -1,7 +1,7 @@
 # close-buffers.nvim
 
-Lua port of [close-buffers.vim](https://github.com/Asheq/close-buffers.vim). This plugin allows you
-to quickly delete multiple buffers based on condition provided.
+Lua port of [close-buffers.vim](https://github.com/Asheq/close-buffers.vim) with a few [feature extensions](#configuration). This plugin allows you
+to quickly delete multiple buffers based on the [condition](#type) provided.
 
 ## Requirements
 
@@ -28,7 +28,7 @@ plug 'kazhala/close-buffers.nvim'
 ```lua
 require('close-buffers').setup({
   filetype_ignore = {},  -- Filetype to ignore when running deletions
-  preserve_window_layout = { 'this', 'hidden' },  -- Types of deletion that should prserve the window layout
+  preserve_window_layout = { 'this', 'hidden' },  -- Types of deletion that should preserve the window layout
   next_buffer_cmd = nil,  -- Custom function to retrieve the next buffer when preserving window layout
 })
 ```
@@ -53,13 +53,19 @@ vim.api.nvim_set_keymap(
   'n',
   '<leader>th',
   [[<CMD>lua require('close_buffers').delete({type = 'hidden'})<CR>]],
-  kb.silent_noremap
+  { noremap = true, silent = true }
 )
 vim.api.nvim_set_keymap(
   'n',
   '<leader>tu',
   [[<CMD>lua require('close_buffers').delete({type = 'nameless'})<CR>]],
-  kb.silent_noremap
+  { noremap = true, silent = true }
+)
+vim.api.nvim_set_keymap(
+  'n',
+  '<leader>tc',
+  [[<CMD>lua require('close_buffers').delete({type = 'this'})<CR>]],
+  { noremap = true, silent = true }
 )
 ```
 
@@ -71,9 +77,10 @@ vim.api.nvim_set_keymap(
 -- bdelete
 require('close_buffers').delete({type = 'hidden', force = true})
 require('close_buffers').delete({type = 'nameless'})
+require('close_buffers').delete({type = 'this'})
 
 -- bwipeout
-require('close_buffers').wipe({type = 'all'})
+require('close_buffers').wipe({type = 'all', force = true})
 require('close_buffers').wipe({type = 'other'})
 ```
 
@@ -86,20 +93,27 @@ To force a deletion, simply append the command with a bang.
 :BDelete hidden
 :BDelete! nameless
 :BWipeout! all
+:BDelete other
+:BDelete! this
 ```
 
 ## Options
 
 ### type
 
-| type     | description                                                        |
-| -------- | ------------------------------------------------------------------ |
-| hidden   | Delete all listed buffers that's not visible in the current window |
-| nameless | Delete all listed buffers without name                             |
-| all      | Delete all listed buffers                                          |
-| other    | Delete all listed buffers except the current focused buffer        |
-| this     | Delete the current focused buffer                                  |
+| type         | description                                                          |
+| ------------ | -------------------------------------------------------------------- |
+| **hidden**   | Delete all listed buffers that's not visible in the current window   |
+| **nameless** | Delete all listed buffers without name                               |
+| **this**     | Delete the current focused buffer without changing the window layout |
+| all          | Delete all listed buffers                                            |
+| other        | Delete all listed buffers except the current focused buffer          |
 
 ### force
 
 Append a `bang` to the `bwipeout` or `bdelete` commands to force a deletion.
+
+## Credit
+
+- [close-buffers.vim](https://github.com/Asheq/close-buffers.vim)
+- [bufdelete.nvim](https://github.com/famiu/bufdelete.nvim)
