@@ -96,6 +96,7 @@ function M.close(delete_type, delete_cmd, force)
       preserve_window_layout(buffer, delete_type)
       delete_buffer(buffer)
     elseif delete_type == 'other' and bufnr ~= buffer then
+      preserve_window_layout(buffer, delete_type)
       delete_buffer(buffer)
     elseif delete_type == 'hidden' and non_hidden_buffer[buffer] == nil then
       delete_buffer(buffer)

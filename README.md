@@ -3,7 +3,7 @@
 Lua port of [close-buffers.vim](https://github.com/Asheq/close-buffers.vim) with a few [feature extensions](#configuration). This plugin allows you
 to quickly delete multiple buffers based on the [condition](#type) provided.
 
-![Video Demo](https://assets.kazhala.me/close-buffers/close-buffers.mov)
+![Demo](https://assets.kazhala.me/close-buffers/demo.gif)
 
 ## Requirements
 
