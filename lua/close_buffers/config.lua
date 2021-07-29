@@ -12,7 +12,7 @@ local _config = {}
 -- @param key string: Config key to get, if not provided, all config is returned.
 -- @return table or (nil, function): All config details or specific keys.
 function M.get(key)
-  local target_config = next(_config) == nil and config or _config
+  local target_config = next(_config) == nil and M.set({}) or _config
 
   if key then
     return target_config[key]

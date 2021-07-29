@@ -8,6 +8,7 @@ local allowed_delete_type = {
   hidden = true,
   all = true,
   this = true,
+  -- glob = true,
 }
 
 --- Main function to delete all buffers
@@ -56,6 +57,13 @@ function M.close(delete_type, delete_cmd, force)
     end, api.nvim_list_wins())
 
     if #windows == 0 then
+      return
+    end
+
+    if del_type == 'other' then
+      for _, win in ipairs(windows) do
+        api.nvim_win_set_buf(win, bufnr)
+      end
       return
     end
 
