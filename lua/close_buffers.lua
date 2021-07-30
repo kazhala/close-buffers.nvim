@@ -1,42 +1,16 @@
 local M = {}
 local buffers = require('close_buffers.buffers')
 
---- Argument parser function
--- @param opts table: Table of options to parse.
--- @return table: Table of parsed options.
-local function get_opts(opts)
-  local result = {}
-  result.delete_type = opts.type
-  result.delete_cmd = opts.delete_cmd
-  result.force = opts.force
-
-  if result.force == true then
-    result.delete_cmd = result.delete_cmd .. '!'
-  end
-
-  return result
-end
-
 --- LUA bwipeout entry function
 -- @param args table: User provided arguments.
-function M.wipe(args)
-  args.delete_cmd = 'bwipeout'
-  local opts = get_opts(args)
-  if opts == nil then
-    return
-  end
-  buffers.close(opts.delete_type, opts.delete_cmd, opts.force)
+function M.wipe(opts)
+  buffers.close(opts.type, 'bwipeout', opts.force, opts.glob, opts.regex)
 end
 
 --- LUA bdelete entry function
 -- @param args table: User provided arguments.
-function M.delete(args)
-  args.delete_cmd = 'bdelete'
-  local opts = get_opts(args)
-  if opts == nil then
-    return
-  end
-  buffers.close(opts.delete_type, opts.delete_cmd, opts.force)
+function M.delete(opts)
+  buffers.close(opts.type, 'bdelete', opts.force, opts.glob, opts.regex)
 end
 
 --- VIM command entry function
