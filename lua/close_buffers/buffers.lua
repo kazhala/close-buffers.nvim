@@ -12,7 +12,7 @@ local allowed_delete_type = {
 
 --- Match buffer name against glob or regex
 -- @param bufnr number: Buffer number to match.
--- @param pattern table: Table of regex and glob patterns.
+-- @param pattern table: Table of parsed regex (vim.regex) and parsed glob (vim.glob2regpat).
 -- @return boolean: buffername matches the pattern.
 local function match_buffer_name(bufnr, pattern)
   local bufname = api.nvim_buf_get_name(bufnr)
@@ -20,9 +20,9 @@ local function match_buffer_name(bufnr, pattern)
   local regex = pattern.regex
 
   if glob then
-    return vim.fn.matchstr(bufname, vim.fn.glob2regpat(glob)) ~= ''
+    return vim.fn.matchstr(bufname, glob) ~= ''
   elseif regex then
-    return vim.regex(regex):match_str(bufname) ~= nil
+    return regex:match_str(bufname) ~= nil
   end
 
   return true
@@ -86,7 +86,7 @@ function M.close(delete_type, delete_cmd, force, glob, regex)
     regex = { regex, 'string', true },
   })
   delete_cmd = force and delete_cmd .. '!' or delete_cmd
-  local pattern = { glob = glob, regex = regex }
+  local pattern = { glob = glob and vim.fn.glob2regpat(glob), regex = regex and vim.regex(regex) }
 
   if allowed_delete_type[delete_type] == nil then
     return
