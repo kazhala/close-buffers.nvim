@@ -1,7 +1,7 @@
 # close-buffers.nvim
 
-Lua port of [close-buffers.vim](https://github.com/Asheq/close-buffers.vim) with a few [feature extensions](#configuration). This plugin allows you
-to quickly delete multiple buffers based on the [condition](#type) provided.
+Lua port of [close-buffers.vim](https://github.com/Asheq/close-buffers.vim) with serveral feature extensions. This plugin allows you
+to quickly delete multiple buffers based on the [conditions](#options) provided.
 
 ![Demo](https://github.com/kazhala/gif/blob/master/close-buffers.gif)
 
@@ -119,6 +119,40 @@ To force a deletion, simply append the command with a bang.
 ### force
 
 Append a `bang` to the `bwipeout` or `bdelete` commands to force a deletion.
+
+### regex
+
+Delete buffers which matches the regex provided.
+
+```lua
+-- delele all markdown buffers
+require('close_buffers').delete({ type = 'all', force = true, regex = '.*[.]md' })
+
+-- delete all hidden lua buffers
+require('close_buffers').delete({ type = 'hidden', regex = '.*[.]lua' })
+```
+
+```
+:BDelete! all regex=.*[.]md
+:BDelete hidden regex=.*[.]lua
+```
+
+### glob
+
+Similar to [regex](#regex), delete buffers which matches the glob pattern provided.
+
+```lua
+-- delele all markdown buffers
+require('close_buffers').delete({ type = 'all', force = true, glob = '*.md' })
+
+-- delete all hidden lua buffers
+require('close_buffers').delete({ type = 'hidden', regex = '*.lua' })
+```
+
+```
+:BDelete! all glob=*.md
+:BDelete hidden glob=*.lua
+```
 
 ## Credit
 
