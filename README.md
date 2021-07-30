@@ -28,7 +28,7 @@ plug 'kazhala/close-buffers.nvim'
 ## Configuration
 
 ```lua
-require('close-buffers').setup({
+require('close_buffers').setup({
   filetype_ignore = {},  -- Filetype to ignore when running deletions
   preserve_window_layout = { 'this', 'hidden' },  -- Types of deletion that should preserve the window layout
   next_buffer_cmd = function(windows) end,  -- Custom function to retrieve the next buffer when preserving window layout
@@ -44,7 +44,7 @@ since you can rearrange the buffer orders ignoring the buffer ID. The following 
 by nvim-bufferline.lua to get the next buffer when preserving the window layout.
 
 ```lua
-require('close-buffers').setup({
+require('close_buffers').setup({
   preserve_window_layout = { 'this' },
   next_buffer_cmd = function(windows)
     require('bufferline').cycle(1)
