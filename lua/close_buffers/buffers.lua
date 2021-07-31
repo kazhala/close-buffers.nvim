@@ -32,8 +32,7 @@ end
 -- @param bufnr number: Buffer number to switch focus.
 -- @param buffers table: List of available buffers.
 -- @param delete_type string: Types of deletion to perform.
--- @param focused_buffer string: Current focused buffer.
-local function preserve_window_layout(bufnr, buffers, delete_type, focused_buffer)
+local function preserve_window_layout(bufnr, buffers, delete_type)
   if not config.get('preserve_window_layout')[delete_type] then
     return
   end
@@ -52,7 +51,7 @@ local function preserve_window_layout(bufnr, buffers, delete_type, focused_buffe
 
   if delete_type == 'other' then
     for _, win in ipairs(windows) do
-      api.nvim_win_set_buf(win, focused_buffer)
+      api.nvim_win_set_buf(win, api.nvim_get_current_buf())
     end
     return
   end
@@ -128,7 +127,7 @@ function M.close(delete_type, delete_cmd, force, glob, regex)
       preserve_window_layout(buffer, buffers, delete_type)
       delete_buffer(buffer)
     elseif delete_type == 'other' and bufnr ~= buffer then
-      preserve_window_layout(buffer, buffers, delete_type, bufnr)
+      preserve_window_layout(buffer, buffers, delete_type)
       delete_buffer(buffer)
     elseif delete_type == 'hidden' and non_hidden_buffer[buffer] == nil then
       delete_buffer(buffer)
