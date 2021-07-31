@@ -2,7 +2,7 @@ local M = {}
 
 local config = {
   filetype_ignore = {},
-  preserve_window_layout = { 'this', 'hidden' },
+  preserve_window_layout = { 'this', 'nameless' },
   next_buffer_cmd = nil,
 }
 
