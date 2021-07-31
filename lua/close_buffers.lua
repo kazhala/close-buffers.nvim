@@ -1,15 +1,24 @@
 local M = {}
 local buffers = require('close_buffers.buffers')
 
+local function check_pattern(opts)
+  if not opts.type and (opts.glob or opts.regex) then
+    opts.type = 'all'
+  end
+  return opts
+end
+
 --- LUA bwipeout entry function
 -- @param args table: User provided arguments.
 function M.wipe(opts)
+  opts = check_pattern(opts)
   buffers.close(opts.type, 'bwipeout', opts.force, opts.glob, opts.regex)
 end
 
 --- LUA bdelete entry function
 -- @param args table: User provided arguments.
 function M.delete(opts)
+  opts = check_pattern(opts)
   buffers.close(opts.type, 'bdelete', opts.force, opts.glob, opts.regex)
 end
 
@@ -19,7 +28,7 @@ end
 -- @param force string: Append bang to deletion command.
 function M.cmd(args, command, force)
   vim.validate({
-    type = { args, 'string' },
+    args = { args, 'string' },
     command = { command, 'string' },
     force = { force, 'string', true },
   })
