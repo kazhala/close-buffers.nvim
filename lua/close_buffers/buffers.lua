@@ -62,7 +62,7 @@ local function preserve_window_layout(bufnr, buffers, delete_type)
   else
     for index, buffer in ipairs(buffers) do
       if buffer == bufnr then
-        local new_focus_index = index + 1 > #buffers and #buffers or index + 1
+        local new_focus_index = index + 1 > #buffers and #buffers - 1 or index + 1
         for _, win in ipairs(windows) do
           api.nvim_win_set_buf(win, buffers[new_focus_index])
         end
@@ -124,10 +124,10 @@ function M.close(delete_type, delete_cmd, force, glob, regex)
         string.format('No write since last change for buffer %d (set force to true to override)', buffer)
       )
     elseif delete_type == 'nameless' and api.nvim_buf_get_name(buffer) == '' then
-      preserve_window_layout(bufnr, buffers, delete_type)
+      preserve_window_layout(buffer, buffers, delete_type)
       delete_buffer(buffer)
     elseif delete_type == 'other' and bufnr ~= buffer then
-      preserve_window_layout(bufnr, buffers, delete_type)
+      preserve_window_layout(buffer, buffers, delete_type)
       delete_buffer(buffer)
     elseif delete_type == 'hidden' and non_hidden_buffer[buffer] == nil then
       delete_buffer(buffer)
