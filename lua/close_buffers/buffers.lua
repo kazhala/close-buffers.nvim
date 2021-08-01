@@ -109,6 +109,7 @@ function M.close(delete_type, delete_cmd, force, glob, regex)
   if delete_type == 'this' and match_buffer_name(bufnr, pattern) then
     preserve_window_layout(bufnr, buffers, delete_type)
     delete_buffer(bufnr)
+    return
   end
 
   local non_hidden_buffer = {}
