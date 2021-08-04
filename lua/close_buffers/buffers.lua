@@ -10,10 +10,10 @@ local allowed_delete_type = {
   this = true,
 }
 
---- Match buffer name against glob or regex
--- @param bufnr number: Buffer number to match.
--- @param pattern table: Table of parsed regex (vim.regex) and parsed glob (vim.glob2regpat).
--- @return boolean: buffername matches the pattern.
+-- Match buffer name against glob or regex.
+---@param bufnr number Buffer number to match.
+---@param pattern table Table of parsed regex (vim.regex) and parsed glob (vim.glob2regpat).
+---@return boolean buffername matches the pattern.
 local function match_buffer_name(bufnr, pattern)
   local bufname = api.nvim_buf_get_name(bufnr)
   local glob = pattern.glob
@@ -28,10 +28,10 @@ local function match_buffer_name(bufnr, pattern)
   return true
 end
 
---- Focus next buffer and preserve window layout
--- @param bufnr number: Buffer number to switch focus.
--- @param buffers table: List of available buffers.
--- @param delete_type string: Types of deletion to perform.
+-- Focus next buffer and preserve window layout.
+---@param bufnr number Buffer number to switch focus.
+---@param buffers table List of available buffers.
+---@param delete_type string Types of deletion to perform.
 local function preserve_window_layout(bufnr, buffers, delete_type)
   if not config.get('preserve_window_layout')[delete_type] then
     return
@@ -71,12 +71,12 @@ local function preserve_window_layout(bufnr, buffers, delete_type)
   end
 end
 
---- Main function to delete all buffers
--- @param delete_type string: Types of buffer to delete.
--- @param delete_cmd string: Command to use to delete the buffer.
--- @param force boolean: Force deletion.
--- @param glob string: Filename pattern to match.
--- @param regex string: Filename pattern
+-- Main function to delete all buffers.
+---@param delete_type string Types of buffer to delete.
+---@param delete_cmd string Command to use to delete the buffer.
+---@param force? boolean Force deletion.
+---@param glob? string Filename pattern to match.
+---@param regex? string Filename pattern.
 function M.close(delete_type, delete_cmd, force, glob, regex)
   vim.validate({
     type = { delete_type, 'string' },
@@ -97,8 +97,8 @@ function M.close(delete_type, delete_cmd, force, glob, regex)
   end, api.nvim_list_bufs())
   local bufnr = api.nvim_get_current_buf()
 
-  --- Delete provided buffer
-  -- @param buf number: Buffer number to delete.
+  -- Delete provided buffer.
+  ---@param buf number Buffer number to delete
   local function delete_buffer(buf)
     if config.get('filetype_ignore')[api.nvim_buf_get_option(buf, 'filetype')] then
       return

@@ -8,9 +8,9 @@ local config = {
 
 local _config = {}
 
---- Get config details.
--- @param key string: Config key to get, if not provided, all config is returned.
--- @return table or (nil, function): All config details or specific keys.
+-- Get config details.
+---@param key? string Config key to get, if not provided, all config is returned.
+---@return table|function|nil All config details or specific keys.
 function M.get(key)
   local target_config = next(_config) == nil and M.set({}) or _config
 
@@ -20,9 +20,9 @@ function M.get(key)
   return target_config
 end
 
---- Set config details.
--- @param user_conf table: Config to set.
--- @return table: Config details.
+-- Set config details.
+---@param user_conf table Config to set.
+---@return table Config details.
 function M.set(user_conf)
   if user_conf and type(user_conf) == 'table' then
     config = vim.tbl_extend('force', config, user_conf)

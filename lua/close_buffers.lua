@@ -8,24 +8,24 @@ local function check_pattern(opts)
   return opts
 end
 
---- LUA bwipeout entry function
--- @param args table: User provided arguments.
+-- LUA bwipeout entry function.
+---@param opts table User provided arguments.
 function M.wipe(opts)
   opts = check_pattern(opts)
   buffers.close(opts.type, 'bwipeout', opts.force, opts.glob, opts.regex)
 end
 
---- LUA bdelete entry function
--- @param args table: User provided arguments.
+-- LUA bdelete entry function.
+---@param opts table User provided arguments.
 function M.delete(opts)
   opts = check_pattern(opts)
   buffers.close(opts.type, 'bdelete', opts.force, opts.glob, opts.regex)
 end
 
---- VIM command entry function
--- @param args string: Command line arguments.
--- @param command string: lua function to invoke, either 'delete' or 'wipe'.
--- @param force string: Append bang to deletion command.
+-- VIM command entry function.
+---@param args string Command line arguments.
+---@param command string The lua function to invoke, either 'delete' or 'wipe'.
+---@param force? string Append bang to deletion command.
 function M.cmd(args, command, force)
   vim.validate({
     args = { args, 'string' },
@@ -49,6 +49,8 @@ function M.cmd(args, command, force)
   M[command](opts)
 end
 
+-- Configure close_buffers options.
+---@param user_conf table
 function M.setup(user_conf)
   require('close_buffers.config').set(user_conf)
 end
