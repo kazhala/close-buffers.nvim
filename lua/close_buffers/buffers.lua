@@ -37,22 +37,36 @@ local function preserve_window_layout(bufnr, buffers, delete_type)
     return
   end
 
+  local all_windows = api.nvim_list_wins()
+
   if #buffers < 2 then
+    local new_buf = api.nvim_create_buf(true, false)
+    for _, win in ipairs(all_windows) do
+      api.nvim_win_set_buf(win, new_buf)
+    end
+    return
+  end
+
+  if delete_type == 'all' then
+    local new_buf = api.nvim_create_buf(true, false)
+    for _, win in ipairs(all_windows) do
+      api.nvim_win_set_buf(win, new_buf)
+    end
+    return
+  end
+
+  if delete_type == 'other' then
+    for _, win in ipairs(all_windows) do
+      api.nvim_win_set_buf(win, api.nvim_get_current_buf())
+    end
     return
   end
 
   local windows = vim.tbl_filter(function(win)
     return api.nvim_win_get_buf(win) == bufnr
-  end, api.nvim_list_wins())
+  end, all_windows)
 
   if #windows == 0 then
-    return
-  end
-
-  if delete_type == 'other' then
-    for _, win in ipairs(windows) do
-      api.nvim_win_set_buf(win, api.nvim_get_current_buf())
-    end
     return
   end
 
@@ -119,6 +133,10 @@ function M.close(delete_type, delete_cmd, force, glob, regex)
     end
   end
 
+  if delete_type == 'all' or delete_type == 'other' then
+    preserve_window_layout(bufnr, buffers, delete_type)
+  end
+
   for _, buffer in ipairs(buffers) do
     if api.nvim_buf_get_option(buffer, 'modified') and not force then
       api.nvim_err_writeln(
@@ -128,7 +146,6 @@ function M.close(delete_type, delete_cmd, force, glob, regex)
       preserve_window_layout(buffer, buffers, delete_type)
       delete_buffer(buffer)
     elseif delete_type == 'other' and bufnr ~= buffer then
-      preserve_window_layout(buffer, buffers, delete_type)
       delete_buffer(buffer)
     elseif delete_type == 'hidden' and non_hidden_buffer[buffer] == nil then
       delete_buffer(buffer)
