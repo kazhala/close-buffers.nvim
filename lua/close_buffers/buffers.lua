@@ -54,7 +54,6 @@ local function preserve_window_layout(bufnr, delete_type)
   end, api.nvim_list_bufs())
 
   if #buffers < 2 then
-    print('hello')
     local new_buf = api.nvim_create_buf(true, false)
     for _, win in ipairs(all_windows) do
       api.nvim_win_set_buf(win, new_buf)
