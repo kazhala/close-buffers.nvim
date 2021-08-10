@@ -13,7 +13,7 @@ local allowed_delete_type = {
 -- Match buffer name against glob or regex.
 ---@param bufnr number Buffer number to match.
 ---@param pattern table Table of parsed regex (vim.regex) and parsed glob (vim.glob2regpat).
----@return boolean buffername matches the pattern.
+---@return boolean Buffer name matches the pattern.
 local function match_buffer_name(bufnr, pattern)
   local bufname = api.nvim_buf_get_name(bufnr)
   local glob = pattern.glob
@@ -28,18 +28,33 @@ local function match_buffer_name(bufnr, pattern)
   return true
 end
 
+-- Match buffer filetype against filetypes or config filetype_ignore.
+---@param bufnr number Buffer number to match.
+---@param filetype? string Filetype to match.
+---@return boolean Buffer filetype matches the given filetype of one of the filetyp in config.
+local function match_buffer_filetype(bufnr, filetype)
+  if filetype ~= nil then
+    return api.nvim_buf_get_option(bufnr, 'filetype') == filetype
+  end
+
+  return config.get('filetype_ignore')[api.nvim_buf_get_option(bufnr, 'filetype')] ~= nil
+end
+
 -- Focus next buffer and preserve window layout.
 ---@param bufnr number Buffer number to switch focus.
----@param buffers table List of available buffers.
 ---@param delete_type string Types of deletion to perform.
-local function preserve_window_layout(bufnr, buffers, delete_type)
+local function preserve_window_layout(bufnr, delete_type)
   if not config.get('preserve_window_layout')[delete_type] then
     return
   end
 
   local all_windows = api.nvim_list_wins()
+  local buffers = vim.tbl_filter(function(buf)
+    return api.nvim_buf_is_valid(buf) and api.nvim_buf_get_option(buf, 'buflisted')
+  end, api.nvim_list_bufs())
 
   if #buffers < 2 then
+    print('hello')
     local new_buf = api.nvim_create_buf(true, false)
     for _, win in ipairs(all_windows) do
       api.nvim_win_set_buf(win, new_buf)
@@ -106,22 +121,44 @@ function M.close(delete_type, delete_cmd, force, glob, regex)
     return
   end
 
-  local buffers = vim.tbl_filter(function(buf)
-    return api.nvim_buf_is_valid(buf) and api.nvim_buf_get_option(buf, 'buflisted') and match_buffer_name(buf, pattern)
-  end, api.nvim_list_bufs())
-  local bufnr = api.nvim_get_current_buf()
-
   -- Delete provided buffer.
-  ---@param buf number Buffer number to delete
+  ---@param buf number Buffer number to delete.
   local function delete_buffer(buf)
-    if config.get('filetype_ignore')[api.nvim_buf_get_option(buf, 'filetype')] then
-      return
-    end
     vim.cmd(delete_cmd .. ' ' .. buf)
   end
 
-  if delete_type == 'this' and match_buffer_name(bufnr, pattern) then
-    preserve_window_layout(bufnr, buffers, delete_type)
+  -- Fileter buffer based on filetype, glob and regex
+  ---@param buf number Buffer number to filter.
+  ---@return boolean Buffer is valid or not.
+  local function buffer_filter(buf)
+    if not api.nvim_buf_is_valid(buf) or not api.nvim_buf_get_option(buf, 'buflisted') then
+      return false
+    end
+    if glob or regex then
+      return match_buffer_name(buf, pattern)
+    else
+      for _, ignore_regex in ipairs(config.get('file_regex_ignore')) do
+        if match_buffer_name(buf, { regex = ignore_regex }) then
+          return false
+        end
+      end
+      for _, ignore_glob in ipairs(config.get('file_glob_ignore')) do
+        if match_buffer_name(buf, { glob = ignore_glob }) then
+          return false
+        end
+      end
+    end
+    if match_buffer_filetype(buf) then
+      return false
+    end
+    return true
+  end
+
+  local buffers = vim.tbl_filter(buffer_filter, api.nvim_list_bufs())
+  local bufnr = api.nvim_get_current_buf()
+
+  if delete_type == 'this' and buffer_filter(bufnr) then
+    preserve_window_layout(bufnr, delete_type)
     delete_buffer(bufnr)
     return
   end
@@ -134,7 +171,7 @@ function M.close(delete_type, delete_cmd, force, glob, regex)
   end
 
   if delete_type == 'all' or delete_type == 'other' then
-    preserve_window_layout(bufnr, buffers, delete_type)
+    preserve_window_layout(bufnr, delete_type)
   end
 
   for _, buffer in ipairs(buffers) do
@@ -143,7 +180,7 @@ function M.close(delete_type, delete_cmd, force, glob, regex)
         string.format('No write since last change for buffer %d (set force to true to override)', buffer)
       )
     elseif delete_type == 'nameless' and api.nvim_buf_get_name(buffer) == '' then
-      preserve_window_layout(buffer, buffers, delete_type)
+      preserve_window_layout(buffer, delete_type)
       delete_buffer(buffer)
     elseif delete_type == 'other' and bufnr ~= buffer then
       delete_buffer(buffer)

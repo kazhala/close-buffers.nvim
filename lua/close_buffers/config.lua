@@ -2,6 +2,8 @@ local M = {}
 
 local config = {
   filetype_ignore = {},
+  file_glob_ignore = {},
+  file_regex_ignore = {},
   preserve_window_layout = { 'this', 'nameless' },
   next_buffer_cmd = nil,
 }
@@ -39,6 +41,14 @@ function M.set(user_conf)
     elseif key == 'preserve_window_layout' then
       for _, delete_type in ipairs(config[key]) do
         _config[key][delete_type] = true
+      end
+    elseif key == 'file_glob_ignore' then
+      for _, glob in ipairs(value) do
+        table.insert(_config[key], vim.fn.glob2regpat(glob))
+      end
+    elseif key == 'file_regex_ignore' then
+      for _, regex in ipairs(value) do
+        table.insert(_config[key], vim.regex(regex))
       end
     else
       _config[key] = value
