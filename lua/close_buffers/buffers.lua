@@ -1,3 +1,5 @@
+-- TODO: Add filetype as an argument, delete all filetypes
+
 local M = {}
 local api = vim.api
 local config = require('close_buffers.config')
