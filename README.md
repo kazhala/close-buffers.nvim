@@ -30,6 +30,8 @@ plug 'kazhala/close-buffers.nvim'
 ```lua
 require('close_buffers').setup({
   filetype_ignore = {},  -- Filetype to ignore when running deletions
+  file_glob_ignore = {},  -- File name glob pattern to ignore when running deletions (e.g. '*.md')
+  file_regex_ignore = {}, -- File name regex pattern to ignore when running deletions (e.g. '.*[.]md')
   preserve_window_layout = { 'this', 'nameless' },  -- Types of deletion that should preserve the window layout
   next_buffer_cmd = nil,  -- Custom function to retrieve the next buffer when preserving window layout
 })
@@ -122,6 +124,8 @@ Append a `bang` to the `bwipeout` or `bdelete` commands to force a deletion.
 
 ### regex
 
+> Using this argument will take precedence over `file_regex_ignore` setting.
+
 Delete buffers which matches the regex provided. When providing regex as an argument, the
 `type` argument can be optional which will fallback to the value `all`.
 
@@ -140,6 +144,8 @@ require('close_buffers').delete({ type = 'hidden', regex = '.*[.]lua' })
 
 ### glob
 
+> Using this argument will take precedence over `file_glob_ignore` setting.
+
 Similar to [regex](#regex), delete buffers which matches the glob pattern provided.
 When providing glob as an argument, the `type` argument can be optional which will fallback to the
 the value `all`.
@@ -149,7 +155,7 @@ the value `all`.
 require('close_buffers').delete({ glob = '*.md', force = true })
 
 -- delete all hidden lua buffers
-require('close_buffers').delete({ type = 'hidden', regex = '*.lua' })
+require('close_buffers').delete({ type = 'hidden', glob = '*.lua' })
 ```
 
 ```
