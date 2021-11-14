@@ -101,6 +101,13 @@ local function preserve_window_layout(bufnr, delete_type)
   end
 end
 
+-- Validate delete type
+---@param delete_type string | number Types of buffer to delete
+---@return boolean Is an allowed delete type
+local function validate_delete_type(delete_type)
+  return allowed_delete_type[delete_type] ~= nil or tonumber(delete_type) ~= nil
+end
+
 -- Main function to delete all buffers.
 ---@param delete_type string Types of buffer to delete.
 ---@param delete_cmd string Command to use to delete the buffer.
@@ -109,7 +116,7 @@ end
 ---@param regex? string Filename pattern.
 function M.close(delete_type, delete_cmd, force, glob, regex)
   vim.validate({
-    type = { delete_type, 'string' },
+    type = { delete_type, validate_delete_type },
     delete_cmd = { delete_cmd, 'string' },
     force = { force, 'boolean', true },
     glob = { glob, 'string', true },
@@ -118,7 +125,7 @@ function M.close(delete_type, delete_cmd, force, glob, regex)
   delete_cmd = force and delete_cmd .. '!' or delete_cmd
   local pattern = { glob = glob and vim.fn.glob2regpat(glob), regex = regex and vim.regex(regex) }
 
-  if allowed_delete_type[delete_type] == nil then
+  if not validate_delete_type(delete_type) then
     return
   end
 
@@ -156,7 +163,14 @@ function M.close(delete_type, delete_cmd, force, glob, regex)
   end
 
   local buffers = vim.tbl_filter(buffer_filter, api.nvim_list_bufs())
-  local bufnr = api.nvim_get_current_buf()
+  local bufnr
+
+  if tonumber(delete_type) == nil then
+    bufnr = api.nvim_get_current_buf()
+  else
+    bufnr = delete_type
+    delete_type = 'this'
+  end
 
   if delete_type == 'this' and buffer_filter(bufnr) then
     preserve_window_layout(bufnr, delete_type)

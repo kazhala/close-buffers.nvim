@@ -87,6 +87,7 @@ vim.api.nvim_set_keymap(
 require('close_buffers').delete({type = 'hidden', force = true})
 require('close_buffers').delete({type = 'nameless'})
 require('close_buffers').delete({type = 'this'})
+require('close_buffers').delete({type = 1})
 
 -- bwipeout
 require('close_buffers').wipe({type = 'all', force = true})
@@ -104,6 +105,7 @@ To force a deletion, simply append the command with a bang.
 :BWipeout! all
 :BDelete other
 :BDelete! this
+:BDelete 1
 ```
 
 ## Options
@@ -117,6 +119,7 @@ To force a deletion, simply append the command with a bang.
 | **this**     | Delete the current focused buffer without changing the window layout |
 | all          | Delete all listed buffers                                            |
 | other        | Delete all listed buffers except the current focused buffer          |
+| `<bufnr>`    | Delete the with buffer number specified                              |
 
 ### force
 
