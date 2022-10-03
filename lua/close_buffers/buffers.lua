@@ -172,10 +172,30 @@ function M.close(delete_type, delete_cmd, force, glob, regex)
     delete_type = 'this'
   end
 
+  local function clear_prompt()
+    if vim.opt.cmdheight._value ~= 0 then
+      vim.cmd "normal! :"
+    end
+  end
+
   if delete_type == 'this' and buffer_filter(bufnr) then
-    preserve_window_layout(bufnr, delete_type)
-    delete_buffer(bufnr)
-    return
+    local ismodified = vim.bo[bufnr].modified
+    local delete = true
+    if ismodified == true and force then
+      vim.ui.input({ prompt = "Close modified buffer without saving? y/n: " }, function(choice)
+        clear_prompt()
+          if choice ~= "y" then
+            delete = false
+          end
+      end)
+
+    end
+
+    if delete then
+      preserve_window_layout(bufnr, delete_type)
+      delete_buffer(bufnr)
+      return
+    end
   end
 
   local non_hidden_buffer = {}
