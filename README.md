@@ -22,7 +22,7 @@ use 'kazhala/close-buffers.nvim'
 ### [vim-plug](https://github.com/junegunn/vim-plug)
 
 ```
-plug 'kazhala/close-buffers.nvim'
+Plug 'kazhala/close-buffers.nvim'
 ```
 
 ## Configuration
